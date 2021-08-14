@@ -14,7 +14,7 @@ describe('CSV Parser', () => {
     });
 
     test('removes duplicate phone', async () => {
-        return csv.parser('basic-phone.csv', strategy.STRATEGY_TYPE.Phone)
+        return csv.parser('basic-phone.csv', strategy.STRATEGY_TYPE.PHONE)
             .then((resp) => {
                 expect(resp[1]).toEqual([
                     'sam,smith,ssmith@smith.com,1231231234',
@@ -113,6 +113,11 @@ describe('CSV Parser', () => {
     test('file not found', async () => {
         return expect(csv.parser('cell-2.csv', strategy.STRATEGY_TYPE.EMAIL_PHONE))
                 .rejects.toMatch('File was not found');
+    });
+
+    test('incorrect duplicate strategy type', async () => {
+        return expect(csv.parser('basic-email.csv', strategy.STRATEGY_TYPE.Email))
+                .rejects.toMatch('Incorrect duplicate strategy type. Please enter one of the following: email, phone, both');
     });
 
     test('handle large input file', async () => {

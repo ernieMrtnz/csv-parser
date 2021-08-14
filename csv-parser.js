@@ -12,9 +12,19 @@ const strategy = require('./duplicate-strategy-type');
  */
 async function parser(filename, inputStrategy) {
     return new Promise(async (resolve, reject) => {
+        if (!isValidStrategy(inputStrategy)) {
+            reject('Incorrect duplicate strategy type. Please enter one of the following: email, phone, both');
+            return;
+        }
+
         const basePath = './csv-files/';
         const outputPath = './output-csv/';
         const filepath = basePath + filename; 
+
+        if (!(await isExists(filepath))) {
+            reject('File was not found');            
+            return;
+        }
 
         let rowCount = 0;
         let csvContentArr = [];    
@@ -22,14 +32,9 @@ async function parser(filename, inputStrategy) {
         let strategyTrackerObj = {};        
 
         try {
-            if (!(await isExists(filepath))) {
-                reject('File was not found');            
-                return;
-            }
-
             const stream = fs.createReadStream(filepath);
 
-            // should check for errors on stream and reject promise
+            // should check for errors on stream
             stream.on('error', _ => {
                 throw 'There was an error reading from stream of csv.';
             });;
@@ -39,7 +44,16 @@ async function parser(filename, inputStrategy) {
                 crlfDelay: Infinity,
             }); 
             const emailIndx = 2;
-            const phoneIndx = 3; 
+            const phoneIndx = 3;
+
+            const firstIndx = inputStrategy === strategy.STRATEGY_TYPE.EMAIL 
+                || inputStrategy === strategy.STRATEGY_TYPE.EMAIL_PHONE 
+                ? emailIndx 
+                : phoneIndx;
+
+            const secondIndx = inputStrategy === strategy.STRATEGY_TYPE.EMAIL_PHONE 
+                ? phoneIndx 
+                : undefined;
             
             reader.on('line', (line) => {
                 let rowLine = line.split('\n');
@@ -49,18 +63,7 @@ async function parser(filename, inputStrategy) {
                     headerRow.push(rowLine[0].split(','));
                 } else {                          
                     for (let item of rowLine) {
-                        let itemRowLine = item.split(',');
-    
-                        if (inputStrategy === strategy.STRATEGY_TYPE.EMAIL_PHONE) {
-                            // pass both email and phone index to filter                    
-                            filterDuplicates(strategyTrackerObj, emailIndx, phoneIndx, itemRowLine, csvContentArr);
-                        } else {
-                            const index = inputStrategy === strategy.STRATEGY_TYPE.EMAIL 
-                                ? emailIndx 
-                                : phoneIndx;
-                            // filter by email only or by phone only, not both
-                            filterDuplicates(strategyTrackerObj, index, undefined, itemRowLine, csvContentArr);
-                        }                
+                        filterDuplicates(strategyTrackerObj, firstIndx, secondIndx, item.split(','), csvContentArr);               
                     }
                 }
     
@@ -84,7 +87,7 @@ async function parser(filename, inputStrategy) {
  * filter out duplicates helper function
  */
 function filterDuplicates(strategyTrackerObj, firstIndx, secondIndx, rowLine, csvContentArr) {
-    if (!isEmpty(rowLine[firstIndx])) {
+    if (firstIndx && !isEmpty(rowLine[firstIndx])) {
         strategyTrackerObj[rowLine[firstIndx]] = (strategyTrackerObj[rowLine[firstIndx]] || 0) + 1;
     }    
 
@@ -93,8 +96,8 @@ function filterDuplicates(strategyTrackerObj, firstIndx, secondIndx, rowLine, cs
         strategyTrackerObj[rowLine[secondIndx]] = (strategyTrackerObj[rowLine[secondIndx]] || 0) + 1;
     }
 
-    // add row into array only if there is no duplicate
-    if ((isEmpty(rowLine[firstIndx]) || strategyTrackerObj[rowLine[firstIndx]] < 2) 
+    // add row into array only if there is no duplicate - empty cells ok
+    if ((!firstIndx || isEmpty(rowLine[firstIndx]) || strategyTrackerObj[rowLine[firstIndx]] < 2) 
         && (!secondIndx || isEmpty(rowLine[secondIndx]) || strategyTrackerObj[rowLine[secondIndx]] < 2)) {            
             csvContentArr.push(rowLine);
     }
@@ -118,6 +121,17 @@ function writeCsvFile(outputFile, csvContentArr, headerRow) {
  */
 function isEmpty(str) {
     return (!str || /^\s*$/.test(str));
+}
+
+/**
+ * checks if strategy for duplicates is valid
+ * @param {*} inputStrategy 
+ * @returns boolean
+ */
+function isValidStrategy(inputStrategy) {
+    return (inputStrategy === strategy.STRATEGY_TYPE.EMAIL
+            || inputStrategy === strategy.STRATEGY_TYPE.PHONE
+            || inputStrategy === strategy.STRATEGY_TYPE.EMAIL_PHONE);
 }
 
 /**
