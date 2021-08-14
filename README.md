@@ -22,6 +22,7 @@ node csv-parser-cli.js -f <filename> -s <duplicateStrategy>
 ```
 *** Note: Replace the `<filename>` with a filename that is found in /csv-files, and `<duplicateStrategy>` with `email`, `phone`, or `both` ***
 
+Once the command is execute to parse csv from intput, an `output.csv` file will be created in `/output-csv` directory
 
 ### Run the test suite
 ```
