@@ -20,7 +20,7 @@ Now we can start the csv parser by running this command:
 ```
 node csv-parser-cli.js -f <filename> -s <duplicateStrategy>
 ```
-*** Note: Replace the <filename> and <duplicateStrategy> with a filename that is found in /csv-files, and duplicateStrategy with email, phone, or both ***
+*** Note: Replace the `<filename>` and `<duplicateStrategy>` with a filename that is found in /csv-files, and duplicateStrategy with email, phone, or both ***
 
 
 ### Run the test suite
