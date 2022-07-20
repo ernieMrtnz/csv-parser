@@ -1,5 +1,5 @@
 ﻿FirstName,LastName,Email,Phone
 sam,smith,ssmith@smith.com,1231231234
 jo,doe,jj@doe.com,1231112233
-test,blank,jj@doe.com,1231234122
-another,blank,,1231231234
+test,blank,jJ@dOe.com,1231234122
+another,blank,,123 1231 234

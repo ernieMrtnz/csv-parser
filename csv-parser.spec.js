@@ -52,7 +52,7 @@ describe('CSV Parser', () => {
                 expect(resp[1]).toEqual([
                     'sam,smith,ssmith@smith.com,1231231234',
                     'jo,doe\'s,jj@doe.com,1231112233',
-                    '"test, Mert\'s",blank,test@blank.com,1231234122'
+                    '"test, Mert\'s",test@blank.com,1231234122'
                 ]);
             });
     });

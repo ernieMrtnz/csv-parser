@@ -1,6 +1,6 @@
 {
-    "name": "kevala-csv-parser",
-    "version": "1.0.0",
+    "name": "em-csv-parser",
+    "version": "1.1.0",
     "scripts": {
         "test": "jest --no-cache ./*",
         "watch": "jest --no-cache --watch ./*",
